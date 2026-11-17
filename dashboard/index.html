@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="A full-coverage token launch radar with snapshot-derived valuations and concrete farm plans.">
+  <title>Token Launch Radar</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <a class="skip" href="#board-table">Skip to the board</a>
+  <main id="board" class="shell" aria-busy="true">
+    <header class="top">
+      <div class="brand">
+        <span class="radar-mark" aria-hidden="true"></span>
+        <div><p class="eyebrow">ONCHAIN RESEARCH / LAUNCH INTELLIGENCE</p><h1>Token Launch Radar</h1></div>
+      </div>
+      <div class="snapshot"><span class="status-dot" aria-hidden="true"></span><span>Snapshot <time id="as-of">—</time></span><span id="version" class="version">radar-2</span></div>
+    </header>
+
+    <section class="overview" aria-label="Snapshot coverage">
+      <div class="intro"><h2>Find the protocols before the token.</h2><p>Full pre-token coverage, ranked by implied FDV from the snapshot's own figures. Select a protocol to inspect the model and its farm plan.</p></div>
+      <div class="stat"><strong id="ranked-count" class="num">—</strong><span>protocols ranked</span><small id="universe-count">Full snapshot coverage</small></div>
+      <div class="stat watch-stat"><strong id="watch-count" class="num">—</strong><span>watchlist covered</span><small id="floor-label">Snapshot watchlist floor</small></div>
+      <div class="stat"><strong id="live-count" class="num">—</strong><span>live tokens set aside</span><small>Separate market-value view</small></div>
+    </section>
+
+    <div class="view-bar">
+      <div class="tabs" role="tablist" aria-label="Protocol views">
+        <button id="board-tab" type="button" role="tab" aria-selected="true" aria-controls="board-view">Pre-token board <span id="board-tab-count" class="num"></span></button>
+        <button id="live-tab" type="button" role="tab" aria-selected="false" aria-controls="live-view" tabindex="-1">Live tokens <span id="live-tab-count" class="num"></span></button>
+      </div>
+      <a id="model-link" href="#model-explainer">How the model works <span aria-hidden="true">↗</span></a>
+    </div>
+
+    <section id="board-view" role="tabpanel" aria-labelledby="board-tab">
+      <form id="filters" class="filters" role="search" aria-label="Filter protocols">
+        <div class="field search-field"><label for="search">Search protocols</label><input id="search" type="search" placeholder="Name, slug, category or chain" autocomplete="off"></div>
+        <div class="field"><label for="category">Category</label><select id="category"><option value="">All categories</option></select></div>
+        <div class="field"><label for="chain">Chain</label><select id="chain"><option value="">All chains</option></select></div>
+        <div class="field"><label for="min-tvl">Minimum TVL</label><select id="min-tvl"><option value="0">Any TVL</option><option value="5000000">$5M+</option><option value="50000000">$50M+</option><option value="100000000">$100M+</option><option value="1000000000">$1B+</option><option value="5000000000">$5B+</option></select></div>
+        <label class="check"><input id="watchlist-only" type="checkbox"><span>Watchlist only</span></label>
+        <button id="reset-filters" class="button subtle" type="button">Reset</button>
+      </form>
+      <div class="results-line"><p id="row-count" role="status" aria-live="polite">Loading snapshot…</p><p>Rank stays tied to implied FDV · click any header to sort</p></div>
+      <div class="panel table-panel">
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Ranked pre-token protocols">
+          <table id="board-table">
+            <caption class="sr-only">Pre-token protocols. All columns sort; protocol rows open the model breakdown and farm plan.</caption>
+            <thead><tr>
+              <th scope="col" aria-sort="ascending"><button type="button" data-sort="rank">Rank <span class="sort-icon" aria-hidden="true">↑</span></button></th>
+              <th scope="col"><button type="button" data-sort="name">Protocol <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th scope="col"><button type="button" data-sort="chains">Chains <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th scope="col" class="numeric"><button type="button" data-sort="tvl_usd">TVL <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th scope="col" class="numeric"><button type="button" data-sort="change_7d">7d change <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th scope="col" class="numeric"><button type="button" data-sort="age_days">Age <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th scope="col" class="numeric"><button type="button" data-sort="implied_value_usd">Implied FDV <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th scope="col" class="numeric"><button type="button" data-sort="expected_airdrop_usd" title="Implied FDV × 7.5% × launch probability; an undivided community-allocation proxy">Expected airdrop* <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th scope="col"><button type="button" data-sort="watchlist">Watchlist <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+            </tr></thead>
+            <tbody id="board-rows"></tbody>
+          </table>
+          <div id="empty-state" class="empty" hidden><h3>No protocols match these filters.</h3><p>Change a filter or reset to see the full board.</p><button id="empty-reset" class="button" type="button">Reset filters</button></div>
+        </div>
+        <p class="table-note">* Airdrop values use a 7.5% community allocation spread across early users. This undivided proxy has no user-count adjustment; individual shares depend on eligibility and the number of users.</p>
+      </div>
+
+      <details id="model-explainer" class="panel model">
+        <summary><span>How the model works</span><span class="muted">One rule for every protocol <span aria-hidden="true">+</span></span></summary>
+        <div class="model-body">
+          <div class="formula">Implied FDV = TVL × category multiple × growth multiplier × maturity multiplier</div>
+          <div class="model-grid">
+            <section><h3><span class="section-number">01</span> The snapshot sets the multiple</h3><p>For each category, use the median market cap / TVL of the snapshot's own tokenized protocols with a nonzero reported market cap and at least $5M TVL. A category needs at least three peers; otherwise it uses the global median across all eligible tokenized protocols.</p><p id="calibration-note" class="calibration num"></p></section>
+            <section><h3><span class="section-number">02</span> Growth and time in market</h3><p>Clamp 7d growth to −60%…+120%, then use 1 + growth / 100 × 0.5. Maturity is 0.6 + min(age in days, 1,095) / 1,095 × 0.4. Age is time since first listing; unknown age uses 365 days and unknown growth uses 0%. Multiply at full precision, round once, and floor the result at $1.</p></section>
+            <section><h3><span class="section-number">03</span> Launch probability</h3><p>A heuristic, with no forecast horizon: start at 25%. Add 25 percentage points at age ≥730 days, or 15 at ≥365. Add 15 points for 7d growth ≥20%, or 5 for growth ≥0%; subtract 15 for growth ≤−20%. Clamp to 5%…90%. Unknown age counts as 365 days; unknown growth counts as 0%.</p></section>
+            <section><h3><span class="section-number">04</span> Expected airdrop assumption</h3><p>Expected airdrop = round(implied FDV × 7.5% × launch probability). This is the typical-farmer proxy under an assumed 7.5% community allocation spread across the protocol's early users. The snapshot has no user count: the formula leaves the allocation undivided, so this is not an individual payout estimate.</p></section>
+          </div>
+          <p class="model-rule">No protocol name is special-cased. Every rankable pre-token protocol is included above and below the watchlist floor. No market cap, CoinGecko ID or symbol means pre-token; CEX entries and names ending in a version marker are excluded from ranking. Wrapped and bridged asset products and exchange wrappers are set aside with the already-trading set because the assets they represent already trade, mirroring the snapshot's own watchlist definition. Live tokens are shown separately at observed market value.</p>
+          <p class="muted">Farm costs are estimates per action: Ethereum $6; Arbitrum $0.40; Base $0.25; Optimism $0.30; Solana $0.05; BSC $0.20; Polygon $0.05; Avalanche $0.30; other chains $1. Plans use the first recorded chain. Capital tiers: $250 at TVL ≥$5B, $150 at ≥$1B, $100 at ≥$100M, otherwise $50. Hold at least 60 days when age &lt;180, 45 when &lt;365, otherwise 30 (unknown: 30), and extend through two monthly snapshots. These are candidate interactions; rewards and product access must be confirmed on the protocol's own pages.</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="live-view" role="tabpanel" aria-labelledby="live-tab" hidden>
+      <div class="live-intro"><div><h2>Already trading</h2><p>These protocols already have tokens. They are shown at observed market value, never ranked by the model. The live set contains up to 48 protocols, ordered by reported market cap.</p></div><span class="live-badge">LIVE TOKEN SET</span></div>
+      <div class="panel table-panel"><div class="table-scroll" tabindex="0" role="region" aria-label="Live-token market values"><table id="live-table"><caption class="sr-only">Live-token protocols shown separately at market cap, not model-ranked.</caption><thead><tr><th scope="col">Protocol</th><th scope="col">Category</th><th scope="col">Chains</th><th scope="col" class="numeric">TVL</th><th scope="col" class="numeric">Market cap</th><th scope="col" class="numeric">7d change</th></tr></thead><tbody id="live-rows"></tbody></table></div></div>
+    </section>
+    <footer><span id="source">Snapshot-derived research</span><span>Static snapshot · USD values · no live price feed</span></footer>
+    <noscript><p class="empty">Enable JavaScript to read the local snapshot and explore the radar.</p></noscript>
+  </main>
+  <dialog id="detail" class="detail" aria-labelledby="detail-title"><div id="detail-content"></div></dialog>
+  <script src="../data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
